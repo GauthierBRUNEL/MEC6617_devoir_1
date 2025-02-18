@@ -78,8 +78,10 @@ for i = 1:length(ta)
     end
 end
 
+
+
 % Comparaison avec et sans interpolation
-nb_classes_list = [5, 10, 20, 50, 100, 200];
+nb_classes_list = [5];
 colors = ['r', 'g', 'b', 'm', 'c', 'k'];
 
 for k = 1:length(nb_classes_list)
@@ -95,18 +97,18 @@ for k = 1:length(nb_classes_list)
     for i = 1:length(tmax)-1
         indices_periode = find(t >= tmax(i) & t < tmax(i+1));
         t_periode = t(indices_periode);
-        signal_periode = signal(indices_periode);
+        signal_periode = signal_centre(indices_periode);
         t_normalise = (t_periode - tmax(i)) / (tmax(i+1) - tmax(i));
         
         indices_periode_interp = find(t >= tmax_interp(i) & t < tmax_interp(i+1));
         t_periode_interp = t(indices_periode_interp);
-        signal_periode_interp = signal(indices_periode_interp);
+        signal_periode_interp = signal_centre(indices_periode_interp);
         t_normalise_interp = (t_periode_interp - tmax_interp(i)) / (tmax_interp(i+1) - tmax_interp(i));
         
         for j = 1:nb_classes
             indices_classe = find(t_normalise >= classes(j) & t_normalise < classes(j+1));
             valeurs_par_classe{j} = [valeurs_par_classe{j}; signal_periode(indices_classe)];
-            % 
+            
             indices_classe_interp = find(t_normalise_interp >= classes(j) & t_normalise_interp < classes(j+1));
             valeurs_par_classe_interp{j} = [valeurs_par_classe_interp{j}; signal_periode_interp(indices_classe_interp)];
         end
@@ -117,18 +119,16 @@ for k = 1:length(nb_classes_list)
         ecart_type_phase(j) = std(valeurs_par_classe{j});
         moyenne_phase_interp(j) = mean(valeurs_par_classe_interp{j});
         ecart_type_phase_interp(j) = std(valeurs_par_classe_interp{j});
-        disp('valeurs pour moy phase par classe');
-        disp(valeurs_par_classe{j});
+        disp('---Valeurs pour moy phase %d', valeurs_par_classe{j})
     end
 
     disp('--- Moyenne de Phase par classe ---');
     disp(moyenne_phase);
 
+    
     % --- Figure pour Moyenne de Phase ---
     f = figure('Visible', 'off');
-    centres_classes = linspace(0, 1, nb_classes + 1); % Génère nb_classes+1 points
-    centres_classes = (centres_classes(1:end-1) + centres_classes(2:end)) / 2; % Moyenne des bords
-    plot(centres_classes, moyenne_phase, '-o', 'Color', colors(k), 'LineWidth', 1.5);
+    plot(linspace(0,1,nb_classes), moyenne_phase, '-o', 'Color', colors(k), 'LineWidth', 1.5);
     title(sprintf('Moyenne de Phase - %d Classes', nb_classes));
     xlabel('Temps Normalisé (t^*)'); ylabel('Débit Moyen (L/min)');
     grid on;
@@ -138,7 +138,7 @@ for k = 1:length(nb_classes_list)
 
     % --- Figure pour Écart-Type de la Phase ---
     f = figure('Visible', 'off');
-    plot(centres_classes, ecart_type_phase, '-o', 'Color', colors(k), 'LineWidth', 1.5);
+    plot(linspace(0,1,nb_classes), ecart_type_phase, '-o', 'Color', colors(k), 'LineWidth', 1.5);
     title(sprintf('Écart-Type de la Phase - %d Classes', nb_classes));
     xlabel('Temps Normalisé (t^*)'); ylabel('Écart-Type');
     grid on;
@@ -148,7 +148,7 @@ for k = 1:length(nb_classes_list)
 
     % --- Figure pour Moyenne de Phase avec Interpolation ---
     f = figure('Visible', 'off');
-    plot(centres_classes, moyenne_phase_interp, '-o', 'Color', colors(k), 'LineWidth', 1.5);
+    plot(linspace(0,1,nb_classes), moyenne_phase_interp, '-o', 'Color', colors(k), 'LineWidth', 1.5);
     title(sprintf('Moyenne de Phase (Interp) - %d Classes', nb_classes));
     xlabel('Temps Normalisé (t^*)'); ylabel('Débit Moyen (L/min)');
     grid on;
@@ -158,7 +158,7 @@ for k = 1:length(nb_classes_list)
 
     % --- Figure pour Écart-Type de la Phase avec Interpolation ---
     f = figure('Visible', 'off');
-    plot(centres_classes, ecart_type_phase, '-o', 'Color', colors(k), 'LineWidth', 1.5);
+    plot(linspace(0,1,nb_classes), ecart_type_phase_interp, '-o', 'Color', colors(k), 'LineWidth', 1.5);
     title(sprintf('Écart-Type de la Phase (Interp) - %d Classes', nb_classes));
     xlabel('Temps Normalisé (t^*)'); ylabel('Écart-Type');
     grid on;
