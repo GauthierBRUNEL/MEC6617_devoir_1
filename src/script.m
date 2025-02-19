@@ -62,16 +62,6 @@ for i = 1:length(ta)
     tmax = [tmax; t(indices_intervalle(indice_max_local))];
 end
 
-% Vérification sur quelques périodes
-for i = 1:min(5, length(tmax)-1)  % On vérifie les 5 premières périodes
-    indices_periode = find(t >= tmax(i) & t < tmax(i+1));
-    signal_periode = signal(indices_periode); 
-
-    indices_periode_interp = find(t >= tmax_interp(i) & t < tmax_interp(i+1));
-    signal_periode_interp = signal(indices_periode_interp);  
-end
-
-
 % Interpolation quadratique autour des maxima
 tmax_interp = [];
 for i = 1:length(ta)
