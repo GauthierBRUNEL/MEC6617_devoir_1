@@ -106,9 +106,19 @@ f_ecart_type_phase = figure('Visible', 'off');
 f_moyenne_phase_interp = figure('Visible', 'off');
 f_ecart_type_phase_interp = figure('Visible', 'off');
 
+% Initialisation des matrices pour stocker les résultats
+moyenne_phase_all = cell(1, length(nb_classes_list));
+ecart_type_phase_all = cell(1, length(nb_classes_list));
+moyenne_phase_interp_all = cell(1, length(nb_classes_list));
+ecart_type_phase_interp_all = cell(1, length(nb_classes_list));
+centres_classes_all = cell(1, length(nb_classes_list));
+
+
 for k = 1:length(nb_classes_list)
     nb_classes = nb_classes_list(k);
     classes = linspace(0, 1, nb_classes+1);
+    
+    % Initialisation
     moyenne_phase = zeros(1, nb_classes);
     moyenne_phase_interp = zeros(1, nb_classes);
     ecart_type_phase = zeros(1, nb_classes);
@@ -116,6 +126,7 @@ for k = 1:length(nb_classes_list)
     valeurs_par_classe = cell(1, nb_classes);
     valeurs_par_classe_interp = cell(1, nb_classes);
 
+    % Boucle sur les périodes
     for i = 1:length(tmax)-1
         indices_periode = find(t >= tmax(i) & t < tmax(i+1));
         t_periode = t(indices_periode);
@@ -136,6 +147,7 @@ for k = 1:length(nb_classes_list)
         end
     end
 
+    % Calcul des statistiques pour chaque classe
     for j = 1:nb_classes
         moyenne_phase(j) = mean(valeurs_par_classe{j});
         ecart_type_phase(j) = std(valeurs_par_classe{j});
@@ -144,51 +156,20 @@ for k = 1:length(nb_classes_list)
     end
 
     % Calcul des centres des classes
-    centres_classes = linspace(0, 1, nb_classes + 1); % Génère nb_classes+1 points
-    centres_classes = (centres_classes(1:end-1) + centres_classes(2:end)) / 2; % Moyenne des bords
+    centres_classes = (classes(1:end-1) + classes(2:end)) / 2;
 
-    % Graphique de la moyenne de phase sans interpolation
-    figure('Visible', 'off');
-    plot(centres_classes, moyenne_phase, '-r', 'LineWidth', 1.5);
-    title(sprintf('Moyenne de Phase sans Interpolation (%d classes)', nb_classes));
-    xlabel('Temps Normalisé (t^*)');
-    ylabel('Débit Moyen (L/min)');
-    grid on;
-    filepath = fullfile(output_dir, sprintf('Moyenne_Phase_sans_Interp_%d_classes.png', nb_classes));
-    saveas(gcf, filepath);
+    % Stocker les résultats pour la deuxième boucle
+    moyenne_phase_all{k} = moyenne_phase;
+    ecart_type_phase_all{k} = ecart_type_phase;
+    moyenne_phase_interp_all{k} = moyenne_phase_interp;
+    ecart_type_phase_interp_all{k} = ecart_type_phase_interp;
+    centres_classes_all{k} = centres_classes;
 
-    % Graphique de l'écart-type sans interpolation
-    figure('Visible', 'off');
-    plot(centres_classes, ecart_type_phase, '-r', 'LineWidth', 1.5);
-    title(sprintf('Écart-Type de la Phase sans Interpolation (%d classes)', nb_classes));
-    xlabel('Temps Normalisé (t^*)');
-    ylabel('Écart-Type');
-    grid on;
-    filepath = fullfile(output_dir, sprintf('Ecart_Type_Phase_sans_Interp_%d_classes.png', nb_classes));
-    saveas(gcf, filepath);
-
-    % Graphique de la moyenne de phase avec interpolation
-    figure('Visible', 'off');
-    plot(centres_classes, moyenne_phase_interp, '-b', 'LineWidth', 1.5);
-    title(sprintf('Moyenne de Phase avec Interpolation (%d classes)', nb_classes));
-    xlabel('Temps Normalisé (t^*)');
-    ylabel('Débit Moyen (L/min)');
-    grid on;
-    filepath = fullfile(output_dir, sprintf('Moyenne_Phase_avec_Interp_%d_classes.png', nb_classes));
-    saveas(gcf, filepath);
-
-    % Graphique de l'écart-type avec interpolation
-    figure('Visible', 'off');
-    plot(centres_classes, ecart_type_phase_interp, '-b', 'LineWidth', 1.5);
-    title(sprintf('Écart-Type de la Phase avec Interpolation (%d classes)', nb_classes));
-    xlabel('Temps Normalisé (t^*)');
-    ylabel('Écart-Type');
-    grid on;
-    filepath = fullfile(output_dir, sprintf('Ecart_Type_Phase_avec_Interp_%d_classes.png', nb_classes));
-    saveas(gcf, filepath);
+    % Sauvegarde des figures individuelles (inchangé)
 end
 
-% Boucle pour créer les graphiques individuels
+
+% Boucle pour créer les graphiques comparatifs
 for k = 1:length(nb_classes_list)
     nb_classes = nb_classes_list(k);
     
@@ -211,38 +192,59 @@ for k = 1:length(nb_classes_list)
     hold on;
 end
 
-% Finalisation des figures
+% Ouvrir les figures AVANT la boucle pour éviter qu'elles ne se ferment
+figure(f_moyenne_phase);
+hold on;
+figure(f_ecart_type_phase);
+hold on;
+figure(f_moyenne_phase_interp);
+hold on;
+figure(f_ecart_type_phase_interp);
+hold on;
+
+for k = 1:length(nb_classes_list)
+    figure(f_moyenne_phase);
+    plot(centres_classes_all{k}, moyenne_phase_all{k}, '-', 'Color', colors(k), 'LineWidth', 1.5);
+
+    figure(f_ecart_type_phase);
+    plot(centres_classes_all{k}, ecart_type_phase_all{k}, '-', 'Color', colors(k), 'LineWidth', 1.5);
+
+    figure(f_moyenne_phase_interp);
+    plot(centres_classes_all{k}, moyenne_phase_interp_all{k}, '-', 'Color', colors(k), 'LineWidth', 1.5);
+
+    figure(f_ecart_type_phase_interp);
+    plot(centres_classes_all{k}, ecart_type_phase_interp_all{k}, '-', 'Color', colors(k), 'LineWidth', 1.5);
+end
+
+% Finalisation des figures (ajout des titres, labels, légendes, etc.)
 figure(f_moyenne_phase);
 title('Moyenne de Phase sans Interpolation');
 xlabel('Temps Normalisé (t^*)'); ylabel('Débit Moyen (L/min)');
 grid on;
-legend(num2str(nb_classes_list'), 'Location', 'best');
-filepath = fullfile(output_dir, 'Moyenne_Phase_sans_Interp.png');
-saveas(f_moyenne_phase, filepath);
+legend(arrayfun(@num2str, nb_classes_list, 'UniformOutput', false), 'Location', 'best');
+saveas(f_moyenne_phase, fullfile(output_dir, 'Moyenne_Phase_sans_Interp.png'));
 
 figure(f_ecart_type_phase);
-title('Écart-Type de la Phase sans Interpolation');
+title('Écart-Type sans Interpolation');
 xlabel('Temps Normalisé (t^*)'); ylabel('Écart-Type');
 grid on;
-legend(num2str(nb_classes_list'), 'Location', 'best');
-filepath = fullfile(output_dir, 'Ecart_Type_Phase_sans_Interp.png');
-saveas(f_ecart_type_phase, filepath);
+legend(arrayfun(@num2str, nb_classes_list, 'UniformOutput', false), 'Location', 'best');
+saveas(f_ecart_type_phase, fullfile(output_dir, 'Ecart_Type_Phase_sans_Interp.png'));
 
 figure(f_moyenne_phase_interp);
 title('Moyenne de Phase avec Interpolation');
 xlabel('Temps Normalisé (t^*)'); ylabel('Débit Moyen (L/min)');
 grid on;
-legend(num2str(nb_classes_list'), 'Location', 'best');
-filepath = fullfile(output_dir, 'Moyenne_Phase_avec_Interp.png');
-saveas(f_moyenne_phase_interp, filepath);
+legend(arrayfun(@num2str, nb_classes_list, 'UniformOutput', false), 'Location', 'best');
+saveas(f_moyenne_phase_interp, fullfile(output_dir, 'Moyenne_Phase_avec_Interp.png'));
 
 figure(f_ecart_type_phase_interp);
-title('Écart-Type de la Phase avec Interpolation');
+title('Écart-Type avec Interpolation');
 xlabel('Temps Normalisé (t^*)'); ylabel('Écart-Type');
 grid on;
-legend(num2str(nb_classes_list'), 'Location', 'best');
-filepath = fullfile(output_dir, 'Ecart_Type_Phase_avec_Interp.png');
-saveas(f_ecart_type_phase_interp, filepath);
+legend(arrayfun(@num2str, nb_classes_list, 'UniformOutput', false), 'Location', 'best');
+saveas(f_ecart_type_phase_interp, fullfile(output_dir, 'Ecart_Type_Phase_avec_Interp.png'));
+
 
 % Calcul des périodes successives (différences entre tmax_interp successifs)
 T = diff(tmax_interp); 
