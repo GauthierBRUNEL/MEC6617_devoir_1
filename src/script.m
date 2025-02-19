@@ -147,6 +147,51 @@ for k = 1:length(nb_classes_list)
     centres_classes = linspace(0, 1, nb_classes + 1); % Génère nb_classes+1 points
     centres_classes = (centres_classes(1:end-1) + centres_classes(2:end)) / 2; % Moyenne des bords
 
+    % Graphique de la moyenne de phase sans interpolation
+    figure('Visible', 'off');
+    plot(centres_classes, moyenne_phase, '-r', 'LineWidth', 1.5);
+    title(sprintf('Moyenne de Phase sans Interpolation (%d classes)', nb_classes));
+    xlabel('Temps Normalisé (t^*)');
+    ylabel('Débit Moyen (L/min)');
+    grid on;
+    filepath = fullfile(output_dir, sprintf('Moyenne_Phase_sans_Interp_%d_classes.png', nb_classes));
+    saveas(gcf, filepath);
+
+    % Graphique de l'écart-type sans interpolation
+    figure('Visible', 'off');
+    plot(centres_classes, ecart_type_phase, '-r', 'LineWidth', 1.5);
+    title(sprintf('Écart-Type de la Phase sans Interpolation (%d classes)', nb_classes));
+    xlabel('Temps Normalisé (t^*)');
+    ylabel('Écart-Type');
+    grid on;
+    filepath = fullfile(output_dir, sprintf('Ecart_Type_Phase_sans_Interp_%d_classes.png', nb_classes));
+    saveas(gcf, filepath);
+
+    % Graphique de la moyenne de phase avec interpolation
+    figure('Visible', 'off');
+    plot(centres_classes, moyenne_phase_interp, '-b', 'LineWidth', 1.5);
+    title(sprintf('Moyenne de Phase avec Interpolation (%d classes)', nb_classes));
+    xlabel('Temps Normalisé (t^*)');
+    ylabel('Débit Moyen (L/min)');
+    grid on;
+    filepath = fullfile(output_dir, sprintf('Moyenne_Phase_avec_Interp_%d_classes.png', nb_classes));
+    saveas(gcf, filepath);
+
+    % Graphique de l'écart-type avec interpolation
+    figure('Visible', 'off');
+    plot(centres_classes, ecart_type_phase_interp, '-b', 'LineWidth', 1.5);
+    title(sprintf('Écart-Type de la Phase avec Interpolation (%d classes)', nb_classes));
+    xlabel('Temps Normalisé (t^*)');
+    ylabel('Écart-Type');
+    grid on;
+    filepath = fullfile(output_dir, sprintf('Ecart_Type_Phase_avec_Interp_%d_classes.png', nb_classes));
+    saveas(gcf, filepath);
+end
+
+% Boucle pour créer les graphiques individuels
+for k = 1:length(nb_classes_list)
+    nb_classes = nb_classes_list(k);
+    
     % Tracé des résultats sans interpolation
     figure(f_moyenne_phase);
     plot(centres_classes, moyenne_phase, '-', 'Color', colors(k), 'LineWidth', 1.5);
